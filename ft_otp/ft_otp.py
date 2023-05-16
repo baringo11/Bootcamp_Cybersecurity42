@@ -40,25 +40,12 @@ if __name__ == "__main__":
             with open(args.k, 'r') as file:
                 key = file.read()
                 fernet = Fernet(password)
-                try:
-                    decrypted_key = fernet.decrypt(key.encode()).decode()
-                except:
-                    print(f"Error al descifar '{args.k}': Contraseña incorrecta")
-                    exit()
-                print(f"key: {key}")
-                print(f"decrypted_key: {decrypted_key}")
-                print(f"decrypted_key texto: {bytes.fromhex(decrypted_key)}")
-
+                decrypted_key = fernet.decrypt(key.encode()).decode()
                 print(gen_otp(decrypted_key))
-                print(subprocess.check_output(["oathtool", "--totp", decrypted_key]).decode())
-               
-                otp_oathtool = subprocess.check_output(["oathtool", "--totp", "-v", decrypted_key]).decode()
-                print('OTP generado por Oathtool:\n', otp_oathtool)
         except FileNotFoundError:
             print(f'El archivo {args.k} no existe')
         except:
-            print("Error oathtool :(")
-
+          print(f"Error al descifar '{args.k}': Contraseña incorrecta")
         exit()
     if not args.g:
         print("Debe proporcionar una clave hexadecimal con la opción '-g'.")
