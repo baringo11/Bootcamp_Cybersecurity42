@@ -1,0 +1,77 @@
+body {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+#texto {
+    display: none;
+    text-align: center;
+    font-weight: bold;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.5;
+    margin: 0 auto;
+    position: absolute;
+    z-index: 1;
+    animation: fadeIn 3s;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 0.5;
+    }
+}
+
+#canvas {
+    position: absolute;
+    z-index: 0;
+
+}
+
+.emoji1 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 19;
+    opacity: 0.3;
+}
+.emoji2 {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 19;
+    opacity: 0.3;
+}
+.emoji3 {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 19;
+    opacity: 0.3;
+}
+.emoji4 {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    z-index: 19;
+    opacity: 0.3;
+}
+
+.titulo {
+    display: inline-block;
+    box-sizing: border-box;
+    border: none;
+    font: normal 4vw / normal "Sans-Serif", Helvetica, Comic Sans MS;
+    color: rgb(255, 255, 255);
+    text-decoration: none;
+    white-space: pre;
+   
+    transition: all 200ms cubic-bezier(0.42, 0, 0.58, 1);
+    width: 100%;
+}
