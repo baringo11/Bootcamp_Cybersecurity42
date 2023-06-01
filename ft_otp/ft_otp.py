@@ -1,5 +1,6 @@
+#!/usr/bin/env python3
+
 import argparse
-import subprocess
 import time
 from cryptography.fernet import Fernet
 import base64
