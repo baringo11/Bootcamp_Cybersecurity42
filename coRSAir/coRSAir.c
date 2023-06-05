@@ -30,7 +30,7 @@ const BIGNUM* get_modulus_publicKey(const char* pathPublicKey, const BIGNUM** n,
 
 }
 
-char*   get_encrypted_text()
+char*   get_encrypted_text(int* len)
 {
     int     fd_encrypted = open("challenge_corsair/7.bin", O_RDONLY);
     char    buffer[4096];
@@ -41,6 +41,7 @@ char*   get_encrypted_text()
 
     while ((bytes_leidos = read(fd_encrypted, buffer, sizeof(buffer))) > 0)
     {
+        *len += bytes_leidos;
         if (!text)
         {
             text = malloc(bytes_leidos);
@@ -48,13 +49,17 @@ char*   get_encrypted_text()
         }
         else
         {
-            tmp = malloc(sizeof(text) + bytes_leidos);
+            tmp = (unsigned char*)malloc(sizeof(text) + bytes_leidos);
             memcpy(tmp, text, sizeof(text));
             memcpy(tmp + sizeof(text), buffer, bytes_leidos);
+            free(text);
+            text = malloc(sizeof(tmp));
             memcpy(text, tmp, sizeof(tmp));
+            free(tmp);
         }
     }
     close(fd_encrypted);
+    return text;
 }
 
 int main() 
@@ -73,12 +78,12 @@ int main()
 
     RSA* rsa = make_RSA(modulus1, mcd, q, e);
 
-    
-    char    *text = get_encrypted_text();
+    int len = 0;
+    char    *text = get_encrypted_text(&len);
     unsigned char* datos_descifrados = (unsigned char*)malloc(4096);
 
-    int resultado = RSA_private_decrypt(strlen(text), text, datos_descifrados, rsa, RSA_PKCS1_PADDING);
-    int archivo_descifrado = open("archivo_descifrado.txt", O_WRONLY | O_CREAT | O_TRUNC);
+    int resultado = RSA_private_decrypt(len, text, datos_descifrados, rsa, RSA_PKCS1_PADDING);
+    int archivo_descifrado = open("archivo_descifrado.txt", O_WRONLY | O_CREAT | O_TRUNC, 0600);
     ssize_t bytes_escritos = write(archivo_descifrado, datos_descifrados, resultado);
     close(archivo_descifrado);
 
