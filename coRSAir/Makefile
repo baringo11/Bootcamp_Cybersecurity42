@@ -6,7 +6,7 @@ LDLIBS 	 =	-lssl -lcrypto
 OPENSSL_PATH = /usr/include/openssl
 INCLUDES = -I$(OPENSSL_PATH)
 
-SRC = coRSAir.c make_RSA.c
+SRC = coRSAir.c make_RSA.c decrypt_file.c RSA_mcd_attack.c
 OBJ_DIR = obj
 OBJS = $(addprefix $(OBJ_DIR)/,$(SRC:.c=.o))
 
@@ -21,6 +21,7 @@ $(NAME): $(OBJS)
 
 clean:
 	rm -f *.o
+	rm -f *.txt
 	rm -rf $(OBJ_DIR)
 
 fclean : clean
