@@ -1,33 +1,35 @@
 #include "coRSAir.h"
 
-const BIGNUM *get_modulus_publicKey(const char *pathPublicKey, const BIGNUM **n, const BIGNUM **e)
+void    get_modulus_publicKey(const char *pathPublicKey, BIGNUM **n, BIGNUM **e)
 {
-    FILE *publicKeyFile = fopen(pathPublicKey, "r");
-    if (!publicKeyFile)
-    {
+    BIO *publicKeyBio = BIO_new_file(pathPublicKey, "r");
+    if (!publicKeyBio){
         printf("Error al abrir %s\n", pathPublicKey);
-        return 0;
+        return ;
     }
 
-    EVP_PKEY *pkey = PEM_read_PUBKEY(publicKeyFile, NULL, NULL, NULL);
-    fclose(publicKeyFile);
-
-    if (!pkey)
-    {
+    EVP_PKEY *pkey = PEM_read_bio_PUBKEY(publicKeyBio, NULL, NULL, NULL);
+    if (!pkey){
         printf("Error al leer la clave pública de %s\n", pathPublicKey);
-        return 0;
+        return ;
     }
 
     RSA *rsaClavePublica = EVP_PKEY_get1_RSA(pkey);
-    EVP_PKEY_free(pkey);
-
-    if (!rsaClavePublica)
-    {
+    if (!rsaClavePublica){
         printf("Error al obtener la clave pública RSA\n");
-        return 0;
+        return ;
     }
 
-    RSA_get0_key(rsaClavePublica, n, e, NULL);
+    const BIGNUM *tmp_n;
+    const BIGNUM *tmp_e;
+    RSA_get0_key(rsaClavePublica, &tmp_n, &tmp_e, NULL);
+
+    BN_copy(*n, tmp_n);
+    BN_copy(*e, tmp_e);
+
+    BIO_free(publicKeyBio);
+    EVP_PKEY_free(pkey);
+    RSA_free(rsaClavePublica);
 }
 
 void    fill_key_struct(t_keys *keys, char *path, BIGNUM *n, BIGNUM *p, BIGNUM *e)
@@ -35,9 +37,10 @@ void    fill_key_struct(t_keys *keys, char *path, BIGNUM *n, BIGNUM *p, BIGNUM *
     BN_CTX *ctx = BN_CTX_new();
     BIGNUM *q = BN_new();
     BN_div(q, NULL, n, p, ctx);
+    BN_CTX_free(ctx);
 
     int n_keys = keys->n_keys;
-    t_key *tmp = (t_key *)malloc(sizeof(t_key) * (n_keys+1));
+    t_key *tmp = (t_key *)malloc(sizeof(t_key) * (n_keys+1)); //leaks
 
     for (int i = 0; i < n_keys; i++)
     {
@@ -48,7 +51,8 @@ void    fill_key_struct(t_keys *keys, char *path, BIGNUM *n, BIGNUM *p, BIGNUM *
     tmp[n_keys].rsa = make_RSA(n, p, q, e);
     keys->n_keys++;
 
-    free(keys->key);
+    if (keys->key)
+        free(keys->key);
     keys->key = tmp;
 }
 
@@ -56,6 +60,7 @@ void get_key_matches(t_keys *keys)
 {
     const char *path = "challenge_corsair/";
 
+    int flag_free;
     int matches[100];
     for (int i = 0; i < 100; i++)
         matches[i] = 0;
@@ -63,6 +68,7 @@ void get_key_matches(t_keys *keys)
     int i = 1;
     while (i < 100)
     {
+        flag_free = 1;
         const BIGNUM *modulus1 = BN_new();
         const BIGNUM *e1 = BN_new();
         char pem_1[100];
@@ -81,20 +87,37 @@ void get_key_matches(t_keys *keys)
                 get_modulus_publicKey(tmp_pem, &tmp_modulus, &e2);
 
                 BIGNUM *mcd = euclidean_algorithm(modulus1, tmp_modulus);
-
-                if (!BN_is_one(mcd))
-                {
+                BIGNUM *mcd2 = BN_new();
+                BN_copy(mcd2, mcd);
+                if (!BN_is_one(mcd)){
                     if (!matches[i]){
+                        flag_free = 0;
                         fill_key_struct(keys, pem_1, modulus1, mcd, e1);
                         matches[i] = 1;
                     }
                     if (!matches[j]){
-                        fill_key_struct(keys, tmp_pem, tmp_modulus, mcd, e2);
+                        fill_key_struct(keys, tmp_pem, tmp_modulus, mcd2, e2);
                         matches[j] = 1;
                     }
+                    else{
+                        BN_free(tmp_modulus);
+                        BN_free(e2);
+                        BN_free(mcd);
+                        BN_free(mcd2);
+                    }
+                }
+                else {
+                    BN_free(tmp_modulus);
+                    BN_free(e2);
+                    BN_free(mcd);
+                    BN_free(mcd2);
                 }
             }
             j++;
+        }
+        if (flag_free){
+            BN_free(modulus1);
+            BN_free(e1);
         }
         i++;
     }

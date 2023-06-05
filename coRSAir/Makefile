@@ -1,23 +1,29 @@
-NAME	 =	coRSAir
-CC 		 =	gcc -g
-CFLAGS 	 =	-Wall -Wextra -w #-Werror
-LDFLAGS  =	-L/usr/lib
-LDLIBS 	 =	-lssl -lcrypto
-OPENSSL_PATH = /usr/include/openssl
-INCLUDES = -I$(OPENSSL_PATH)
+NAME		 =	coRSAir
+CC 			 =	gcc -g
+CFLAGS 		 =	-Wall -Wextra -w $(INCLUDES)
+LDFLAGS 	 =	-L/usr/lib
+LDLIBS 	 	 =	-lssl -lcrypto
+OPENSSL_PATH = 	/usr/include/openssl
+INCLUDES 	 = 	-I$(OPENSSL_PATH)
+SRC 		 = 	coRSAir.c make_RSA.c decrypt_file.c RSA_mcd_attack.c
+OBJ_DIR 	 = 	obj
+DEBUG_FLAGS	 =	-g3 $(SANITIZE)
+SANITIZE		=	-fsanitize=address -fno-omit-frame-pointer -fsanitize-address-use-after-scope
 
-SRC = coRSAir.c make_RSA.c decrypt_file.c RSA_mcd_attack.c
-OBJ_DIR = obj
 OBJS = $(addprefix $(OBJ_DIR)/,$(SRC:.c=.o))
 
 all: $(NAME)
 
-$(OBJ_DIR)/%.o:	%.c Makefile
+$(OBJ_DIR)/%.o:	%.c
 		@mkdir -p $(@D)
-		$(CC) $(CFLAGS) -c $< -o $@
+		$(CC) $(CFLAGS) $(LDFLAGS) -c $< -o $@
 
 $(NAME): $(OBJS)
-	${CC} ${CFLAGS} $(INCLUDES) $(LDFLAGS) -o ${NAME} ${OBJS} $(LDLIBS)
+	${CC} ${CFLAGS} $(LDFLAGS) -o $@ $^ $(LDLIBS)
+
+debug: LDFLAGS += $(DEBUG_FLAGS)
+debug: LDFLAGS += $(SANITIZE)
+debug: fclean $(NAME)
 
 clean:
 	rm -f *.o

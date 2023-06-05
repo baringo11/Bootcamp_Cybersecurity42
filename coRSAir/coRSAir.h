@@ -23,11 +23,11 @@ typedef struct s_keys
     int     n_keys;
 } t_keys;
 
-const BIGNUM* get_modulus_publicKey(const char* pathPublicKey, const BIGNUM** n, const BIGNUM** e);
-RSA* make_RSA(BIGNUM *n, BIGNUM *p, BIGNUM *q, BIGNUM *e);
-BIGNUM * euclidean_algorithm(BIGNUM *a, BIGNUM *b);
-char *get_encrypted_text(int fd, int *len);
-char * decrypt_file(int fd, RSA* rsa, int *output_bytes);
-int RSA_mcd_attack(t_keys *keys);
+void    get_modulus_publicKey(const char* pathPublicKey, BIGNUM** n, BIGNUM** e);
+RSA*    make_RSA(BIGNUM *n, BIGNUM *p, BIGNUM *q, BIGNUM *e);
+BIGNUM* euclidean_algorithm(BIGNUM *a, BIGNUM *b);
+char*   get_encrypted_text(int fd, int *len);
+char*   decrypt_file(int fd, RSA* rsa, int *output_bytes);
+int     RSA_mcd_attack(t_keys *keys);
 
 #endif

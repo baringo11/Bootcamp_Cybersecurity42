@@ -2,7 +2,7 @@
 
 BIGNUM * euclidean_algorithm(BIGNUM *a, BIGNUM *b)
 {
-    BIGNUM *tmp = BN_new();
+    BIGNUM *tmp;
     BIGNUM *tmpA = BN_new();
     BIGNUM *tmpB = BN_new();
     BN_CTX *ctx = BN_CTX_new();
@@ -11,12 +11,18 @@ BIGNUM * euclidean_algorithm(BIGNUM *a, BIGNUM *b)
     BN_copy(tmpB, b);
     while (BN_is_zero(tmpB) == 0) 
     {
+        tmp = BN_new();
         BN_copy(tmp, tmpB);
         BN_mod(tmpB, tmpA, tmpB, ctx);
+        
+        BN_free(tmpA);
+        tmpA = BN_new();
+
         BN_copy(tmpA, tmp);
+        BN_free(tmp);
     }
-    BN_free(tmp);
     BN_free(tmpB);
+    BN_CTX_free(ctx);
     return tmpA;
 }
 
@@ -49,5 +55,9 @@ RSA* make_RSA(BIGNUM *n, BIGNUM *p, BIGNUM *q, BIGNUM *e)
     RSA_set0_factors(rsa, p, q);
     RSA_set0_crt_params(rsa, dmp1, dmq1, iqmp);
 
+    BN_CTX_free(ctx);
+    BN_free(p_minus_1);
+    BN_free(q_minus_1);
+    BN_free(phi);
     return rsa;
 }
