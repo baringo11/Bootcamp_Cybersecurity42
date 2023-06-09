@@ -1,14 +1,14 @@
 NAME		 =	coRSAir
 CC 			 =	gcc -g
 CFLAGS 		 =	-Wall -Wextra -w $(INCLUDES)
-LDFLAGS 	 =	-L/usr/lib
+LDFLAGS 	 =	-Lopenssl/lib
 LDLIBS 	 	 =	-lssl -lcrypto
-OPENSSL_PATH = 	/usr/include/openssl
+OPENSSL_PATH = 	openssl/include/
 INCLUDES 	 = 	-I$(OPENSSL_PATH)
 SRC 		 = 	coRSAir.c make_RSA.c decrypt_file.c RSA_mcd_attack.c
 OBJ_DIR 	 = 	obj
 DEBUG_FLAGS	 =	-g3 $(SANITIZE)
-SANITIZE		=	-fsanitize=address -fno-omit-frame-pointer -fsanitize-address-use-after-scope
+SANITIZE	 =	-fsanitize=address -fno-omit-frame-pointer -fsanitize-address-use-after-scope
 
 OBJS = $(addprefix $(OBJ_DIR)/,$(SRC:.c=.o))
 
