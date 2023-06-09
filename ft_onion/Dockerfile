@@ -13,4 +13,4 @@ COPY /conf/web/index.html /usr/share/nginx/html/index.html
 COPY /conf/web/style.css /usr/share/nginx/html/style.css
 COPY /conf/web/matrix.js /usr/share/nginx/html/matrix.js
 
-CMD service nginx start && service tor start && service ssh start && cat /var/lib/tor/hidden_service/hostname && bash
+CMD service nginx start && service tor start && service ssh start && echo "\n ********** hidden_service **********" && cat /var/lib/tor/hidden_service/hostname && echo "" && bash
